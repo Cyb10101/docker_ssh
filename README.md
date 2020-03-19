@@ -9,7 +9,7 @@ version: '3.6'
 
 services:
   ssh:
-    image: cyb10101/ssh
+    image: cyb10101/ssh:latest
     restart: always
     # Optional: Set a nice hostname 
     hostname: example
