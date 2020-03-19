@@ -2,7 +2,9 @@
 
 Docker file: [cyb10101/ssh](https://hub.docker.com/r/cyb10101/ssh)
 
-Take a look in [docker-compose.yml](docker-compose.yml).
+If you only use `SFTP` you will get into a `chroot` environment.
+
+Take a look in [docker-compose.yml](docker-compose.yml):
 
 ```yaml
 version: '3.6'
