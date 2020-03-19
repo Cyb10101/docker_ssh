@@ -16,8 +16,7 @@ services:
     # Optional: Set a nice hostname 
     hostname: example
     volumes:
-      # Required: Set port 2200 
-      - ./public:/data
+      - ./public:/data/example
     ports:
       # Required: Set port 2200 
       - "0.0.0.0:2200:22"

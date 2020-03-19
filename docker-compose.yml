@@ -6,7 +6,7 @@ services:
     restart: always
     hostname: example
     volumes:
-      - ./public:/data
+      - ./public:/data/example
     ports:
       - "0.0.0.0:2200:22"
     environment:

@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 set -e
 
+function setUserPermissions() {
+  chown ${1}:${2} ${APPLICATION_HOME}
+  chown ${1}:${2} ${APPLICATION_HOME}/.bash_logout
+  chown ${1}:${2} ${APPLICATION_HOME}/.bashrc
+  chown -R ${1}:${2} ${APPLICATION_HOME}/.oh-my-zsh/
+  chown ${1}:${2} ${APPLICATION_HOME}/.profile
+  chown ${1}:${2} ${APPLICATION_HOME}/.shell-methods.sh
+  chown ${1}:${2} ${APPLICATION_HOME}/.zshrc
+}
+
 APPLICATION_UID=${APPLICATION_UID:-1000}
 APPLICATION_GID=${APPLICATION_GID:-1000}
 APPLICATION_USER=${APPLICATION_USER:-application}
@@ -38,6 +48,9 @@ fi
 
 # User exists
 if id -u "${APPLICATION_USER}" >/dev/null 2>&1; then
+  # Sync sleketon
+  rsync -av /etc/skel/ /data/
+
   # Add SSH key, because /etc/skel doesn't copy that
   if [ ! -f "${APPLICATION_HOME}/.ssh/authorized_keys" ] && [ "${SSH_PUBLIC_KEY}" != "" ]; then
     mkdir -p ${APPLICATION_HOME}/.ssh
@@ -46,7 +59,7 @@ if id -u "${APPLICATION_USER}" >/dev/null 2>&1; then
   fi
 
   # Default permissions
-  chown ${APPLICATION_GROUP}:"${APPLICATION_GROUP}" ${APPLICATION_HOME}
+  setUserPermissions "${APPLICATION_GROUP}" "${APPLICATION_GROUP}"
 
   # Set password
   echo "${APPLICATION_USER}":"${PASSWORD}" | chpasswd
@@ -64,7 +77,7 @@ if [ "${SSH_KEYS_ONLY}" == 1 ]; then
 fi
 
 if [ "${SFTP_ONLY}" == 1 ]; then
-  chown root:"${APPLICATION_GROUP}" ${APPLICATION_HOME}
+  setUserPermissions "root" "${APPLICATION_GROUP}"
 
   sed -E -i 's/^#?(Subsystem sftp) .*/\1 internal-sftp/' /etc/ssh/sshd_config
   echo "ChrootDirectory %h" >> /etc/ssh/sshd_config
