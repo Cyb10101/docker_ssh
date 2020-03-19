@@ -1,0 +1,24 @@
+version: '3.6'
+
+services:
+  ssh:
+    image: cyb10101/ssh
+    restart: always
+    hostname: example
+    volumes:
+      - ./public:/data
+    ports:
+      - "0.0.0.0:2201:22"
+    environment:
+      - APPLICATION_USER=application
+      - APPLICATION_GROUP=application
+      - SFTP_ONLY=0
+      - PASSWORD=dev
+      - SSH_KEYS_ONLY=1
+      - SSH_PUBLIC_KEY=ssh-rsa AB...iQ== user@example.org
+      - SHELL=zsh
+
+networks:
+  default:
+    external:
+      name: global
