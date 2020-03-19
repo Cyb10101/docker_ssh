@@ -8,12 +8,12 @@ services:
     volumes:
       - ./public:/data
     ports:
-      - "0.0.0.0:2201:22"
+      - "0.0.0.0:2200:22"
     environment:
       - APPLICATION_USER=application
       - APPLICATION_GROUP=application
-      - SFTP_ONLY=0
-      - PASSWORD=dev
+      - SFTP_ONLY=1
+      - PASSWORD=
       - SSH_KEYS_ONLY=1
       - SSH_PUBLIC_KEY=ssh-rsa AB...iQ== user@example.org
       - SHELL=zsh
