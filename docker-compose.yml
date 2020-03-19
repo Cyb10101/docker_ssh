@@ -17,8 +17,3 @@ services:
       - SSH_KEYS_ONLY=1
       - SSH_PUBLIC_KEY=ssh-rsa AB...iQ== user@example.org
       - SHELL=zsh
-
-networks:
-  default:
-    external:
-      name: global

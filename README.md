@@ -40,11 +40,6 @@ services:
 
       # Optional: bash, zsh, false
       - SHELL=zsh
-
-networks:
-  default:
-    external:
-      name: global
 ```
 
 Connect via SSH:
