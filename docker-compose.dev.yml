@@ -2,8 +2,7 @@ version: '3.8'
 
 services:
   ssh:
-    image: cyb10101/ssh:latest
-    restart: always
+    build: .
     hostname: example
     volumes:
       - ./public:/data/example_www
@@ -12,8 +11,8 @@ services:
     environment:
       - APPLICATION_USER=application
       - APPLICATION_GROUP=application
-      - SFTP_ONLY=1
-      - PASSWORD=
-      - SSH_KEYS_ONLY=1
+      - SFTP_ONLY=0
+      - PASSWORD=Admin123!
+      - SSH_KEYS_ONLY=0
       - SSH_PUBLIC_KEY=ssh-rsa AB...iQ== user@example.org
       - SHELL=zsh

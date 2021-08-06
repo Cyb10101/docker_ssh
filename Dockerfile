@@ -1,8 +1,8 @@
-FROM ubuntu:16.04
+FROM ubuntu:20.04
 
 RUN apt-get update && \
-    apt-get install -y openssh-server mcrypt \
-      less vim nano diffutils git-core bash-completion zsh htop mariadb-client iputils-ping \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y openssh-server mcrypt \
+      rsync less vim nano diffutils git-core bash-completion zsh htop mariadb-client iputils-ping \
       && \
     mkdir /var/run/sshd && chmod 0755 /var/run/sshd && \
     git clone https://github.com/robbyrussell/oh-my-zsh.git /etc/skel/.oh-my-zsh && \
