@@ -9,7 +9,7 @@ configureSkeleton() {
 }
 
 syncRoot() {
-  rsync -av /etc/skel/ /root/
+  rsync -a /etc/skel/ /root/
 }
 
 # Motd - Message of the day

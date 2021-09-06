@@ -9,9 +9,8 @@ setDefaultVariables() {
 
   # Just generate a password if empty
   if [ "${PASSWORD}" == "" ]; then
-    PASSWORD=`date +%s | sha256sum | base64 | head -c 32`
-    #PASSWORD=`tr -dc '[:alnum:]' < /dev/urandom | head -c 32`
-    echo "Password: ${PASSWORD}"
+    PASSWORD=`tr -dc '[:alnum:]' < /dev/urandom | head -c 32`
+    NOTES_PASSWORD=1
   fi
 }
 
@@ -32,7 +31,7 @@ updateLocale() {
 
 createUserIfNotExists() {
   # User not exists
-  if ! id "${APPLICATION_USER}" >/dev/null 2>&1; then
+  if ! id "${APPLICATION_USER}" > /dev/null 2>&1; then
     echo "Create user ${APPLICATION_USER}..."
     # Add group
     groupadd -g "${APPLICATION_GID}" "${APPLICATION_GROUP}"
@@ -52,10 +51,10 @@ createUserIfNotExists() {
 
 syncUserData() {
   # User exists
-  if id -u "${APPLICATION_USER}" >/dev/null 2>&1; then
+  if id -u "${APPLICATION_USER}" > /dev/null 2>&1; then
     # Sync skeleton only if shell enabled
     if [ "${ENABLE_SHELL}" == 1 ]; then
-      rsync -av /etc/skel/ /data/
+      rsync -a /etc/skel/ /data/
     fi
 
     # Add SSH directory, because /etc/skel doesn't copy that
@@ -112,7 +111,7 @@ setUserPermissions() {
 # Configure SSH daemon...
 configureSshd() {
   # Only allow specified user
-  if grep -E '^#?(AllowUsers) .*' /etc/ssh/sshd_config >/dev/null 2>&1; then
+  if grep -E '^#?(AllowUsers) .*' /etc/ssh/sshd_config > /dev/null 2>&1; then
     sed -E -i "s/^#?(AllowUsers) .*/\1 ${APPLICATION_USER}/" /etc/ssh/sshd_config
   else
     echo "AllowUsers ${APPLICATION_USER}" >> /etc/ssh/sshd_config
@@ -163,6 +162,12 @@ configureFail2Ban() {
   fi
 }
 
+notes() {
+  if [ "${NOTES_PASSWORD}" == 1 ]; then
+    echo -e "\nPassword: ${PASSWORD}\n"
+  fi
+}
+
 cleanup() {
   # Unset variables for security
   unset PASSWORD SSH_PUBLIC_KEY
@@ -189,6 +194,7 @@ syncUserData
 configureSshd
 configureFail2Ban
 
+notes
 cleanup
 
 # Remove Socket file
@@ -199,12 +205,12 @@ if [ -S /var/run/fail2ban/fail2ban.sock ]; then
   rm /var/run/fail2ban/fail2ban.sock
 fi
 
-echo "Start services..."
-service rsyslog restart
-service ssh restart
-service fail2ban restart
+echo 'Start services...'
+service rsyslog restart > /dev/null
+service ssh restart > /dev/null
+service fail2ban restart > /dev/null
 
-echo "Running..."
+echo 'Running...'
 #tail -f /dev/null
 
 # Stop container if health script fails, useful for "restart always"
