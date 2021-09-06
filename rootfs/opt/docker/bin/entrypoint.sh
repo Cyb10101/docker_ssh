@@ -10,14 +10,14 @@ setDefaultVariables() {
   # Just generate a password if empty
   if [ "${PASSWORD}" == "" ]; then
     PASSWORD=`date +%s | sha256sum | base64 | head -c 32`
-    #PASSWORD=`tr -dc [:alnum:] < /dev/urandom | head -c 32`
+    #PASSWORD=`tr -dc '[:alnum:]' < /dev/urandom | head -c 32`
     echo "Password: ${PASSWORD}"
   fi
 }
 
 updateTimeZone() {
   if [ ! -z "${TZ}" ] && [ -f "/usr/share/zoneinfo/${TZ}" ]; then
-   ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone
+    ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone
   fi
 }
 
@@ -40,7 +40,7 @@ createUserIfNotExists() {
     # Add user
     #useradd -u "${APPLICATION_UID}" --home "${APPLICATION_HOME}" --create-home --shell /bin/${SHELL} --no-user-group "${APPLICATION_USER}" -k /etc/skel
 
-    PASSWORD_ENCRYPTED=`openssl passwd -6 -salt $(tr -dc [:alnum:] < /dev/urandom | head -c 10) ${PASSWORD}`
+    PASSWORD_ENCRYPTED=`openssl passwd -6 -salt $(tr -dc '[:alnum:]' < /dev/urandom | head -c 10) ${PASSWORD}`
     useradd -u "${APPLICATION_UID}" -p ${PASSWORD_ENCRYPTED} --home "${APPLICATION_HOME}" --create-home --shell /bin/${SHELL} --no-user-group "${APPLICATION_USER}" -k /etc/skel
     unset PASSWORD_ENCRYPTED
 
@@ -157,8 +157,6 @@ configureFail2Ban() {
 }
 
 cleanup() {
-  apt-get clean && rm -rf /var/lib/apt/lists/*
-
   # Unset variables for security
   unset PASSWORD SSH_PUBLIC_KEY
 }
@@ -168,10 +166,10 @@ APPLICATION_GID=${APPLICATION_GID:-1000}
 APPLICATION_USER=${APPLICATION_USER:-application}
 APPLICATION_GROUP=${APPLICATION_GROUP:-application}
 APPLICATION_HOME="/data"
-ENABLE_SHELL=${ENABLE_SHELL:-0}
 PASSWORD=${PASSWORD:-}
 SSH_KEYS_ONLY=${SSH_KEYS_ONLY:-0}
 SSH_PUBLIC_KEY=${SSH_PUBLIC_KEY:-}
+ENABLE_SHELL=${ENABLE_SHELL:-0}
 SHELL=${SHELL:-bash}
 
 setDefaultVariables
@@ -183,13 +181,8 @@ syncUserData
 
 configureSshd
 configureFail2Ban
-#cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
 
 cleanup
-
-
-# fail2ban-client set sshd banip 192.168.224.1
-
 
 # Remove Socket file
 if [ ! -z "$(service fail2ban status | grep 'is running')" ]; then
@@ -203,10 +196,6 @@ echo "Start services..."
 service rsyslog restart
 service ssh restart
 service fail2ban restart
-
-# echo "Running SSH daemon..."
-# Pass all remaining arguents to sshd. This enables to override some options through -o.
-#exec /usr/sbin/sshd -D -E /var/log/auth.log -e "$@"
 
 echo "Running..."
 #tail -f /dev/null
