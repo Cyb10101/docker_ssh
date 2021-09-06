@@ -37,9 +37,10 @@ createUserIfNotExists() {
     # Add group
     groupadd -g "${APPLICATION_GID}" "${APPLICATION_GROUP}"
 
-    # Add user
+    # Add user without password
     #useradd -u "${APPLICATION_UID}" --home "${APPLICATION_HOME}" --create-home --shell /bin/${SHELL} --no-user-group "${APPLICATION_USER}" -k /etc/skel
 
+    # Add user with password
     PASSWORD_ENCRYPTED=`openssl passwd -6 -salt $(tr -dc '[:alnum:]' < /dev/urandom | head -c 10) ${PASSWORD}`
     useradd -u "${APPLICATION_UID}" -p ${PASSWORD_ENCRYPTED} --home "${APPLICATION_HOME}" --create-home --shell /bin/${SHELL} --no-user-group "${APPLICATION_USER}" -k /etc/skel
     unset PASSWORD_ENCRYPTED
@@ -57,11 +58,17 @@ syncUserData() {
       rsync -av /etc/skel/ /data/
     fi
 
-    # Add SSH key, because /etc/skel doesn't copy that
-    if [ ! -f "${APPLICATION_HOME}/.ssh/authorized_keys" ] && [ "${SSH_PUBLIC_KEY}" != "" ]; then
+    # Add SSH directory, because /etc/skel doesn't copy that
+    if [ ! -f "${APPLICATION_HOME}/.ssh/authorized_keys" ]; then
       mkdir -p ${APPLICATION_HOME}/.ssh
-      echo "${SSH_PUBLIC_KEY}" >> ${APPLICATION_HOME}/.ssh/authorized_keys
+      touch ${APPLICATION_HOME}/.ssh/authorized_keys
       chown -R ${APPLICATION_USER}:"${APPLICATION_GROUP}" ${APPLICATION_HOME}/.ssh
+    fi
+
+    # Add SSH key if not exists
+    if [ "${SSH_PUBLIC_KEY}" != "" ] && [ "`grep \"${SSH_PUBLIC_KEY}\" ${APPLICATION_HOME}/.ssh/authorized_keys`" == "" ];
+      echo "${SSH_PUBLIC_KEY}" >> ${APPLICATION_HOME}/.ssh/authorized_keys
+      chown ${APPLICATION_USER}:"${APPLICATION_GROUP}" ${APPLICATION_HOME}/.ssh/authorized_keys
     fi
 
     # Default permissions
