@@ -1,5 +1,10 @@
 FROM ubuntu:20.04
 
+ENV APPLICATION_USER="application" \
+    APPLICATION_GROUP="application" \
+    APPLICATION_UID="1000" \
+    APPLICATION_GID="1000"
+
 RUN apt-get update && apt-get -y full-upgrade && \
     DEBIAN_FRONTEND=noninteractive apt-get -y install openssh-server mcrypt libcap2-bin \
       locales locales-all keyboard-configuration \
