@@ -62,13 +62,13 @@ syncUserData() {
     if [ ! -f "${APPLICATION_HOME}/.ssh/authorized_keys" ]; then
       mkdir -p ${APPLICATION_HOME}/.ssh
       touch ${APPLICATION_HOME}/.ssh/authorized_keys
-      chown -R ${APPLICATION_USER}:"${APPLICATION_GROUP}" ${APPLICATION_HOME}/.ssh
+      chown -R ${APPLICATION_USER}:${APPLICATION_GROUP} ${APPLICATION_HOME}/.ssh
     fi
 
     # Add SSH key if not exists
-    if [ "${SSH_PUBLIC_KEY}" != "" ] && [ "`grep \"${SSH_PUBLIC_KEY}\" ${APPLICATION_HOME}/.ssh/authorized_keys`" == "" ];
+    if [ "${SSH_PUBLIC_KEY}" != "" ] && [ "`grep \"${SSH_PUBLIC_KEY}\" ${APPLICATION_HOME}/.ssh/authorized_keys`" == "" ]; then
       echo "${SSH_PUBLIC_KEY}" >> ${APPLICATION_HOME}/.ssh/authorized_keys
-      chown ${APPLICATION_USER}:"${APPLICATION_GROUP}" ${APPLICATION_HOME}/.ssh/authorized_keys
+      chown ${APPLICATION_USER}:${APPLICATION_GROUP} ${APPLICATION_HOME}/.ssh/authorized_keys
     fi
 
     # Default permissions
