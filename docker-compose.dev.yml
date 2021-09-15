@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   ssh:
@@ -9,10 +9,27 @@ services:
     ports:
       - "0.0.0.0:2200:22"
     environment:
+      - TZ=Europe/Berlin
+      - LANG=de_DE.UTF-8
       - APPLICATION_USER=application
       - APPLICATION_GROUP=application
-      - SFTP_ONLY=0
       - PASSWORD=Admin123!
-      - SSH_KEYS_ONLY=0
-      - SSH_PUBLIC_KEY=ssh-rsa AB...iQ== user@example.org
+      #- SSH_KEYS_ONLY=1
+      #- SSH_PUBLIC_KEY=ssh-rsa AB...iQ== user@example.org
+      - ENABLE_SHELL=1
       - SHELL=zsh
+
+      # Optional: Max tries per ssh login (Default: 6) [Multiple identity file fails (*.pub) + 3 Password fails = 4 fails]
+      - MAX_TRIES_SSH=6
+
+      # Optional: Number of failures before a host get banned (Default: 5) [Tries detected by logging]
+      - MAX_TRIES_BAN=5
+
+      # Optional: A host is banned if it has generated "maxretry" during the last "findtime" seconds (Default: 10m) [Days: 1d, Hours: 1h, Minutes: 1m]
+      - FIND_TIME=1h
+
+      # Optional: Ban time in seconds (Default: 10m) [Days: 1d, Hours: 1h, Minutes: 1m]
+      - BAN_TIME=1h
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
