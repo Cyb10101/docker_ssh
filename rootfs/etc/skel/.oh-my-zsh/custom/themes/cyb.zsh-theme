@@ -111,7 +111,7 @@ precmd() {
     _TIME="%T"
 
     LEFT="%{$fg[cyan]%}[$_USERNAME%{$fg[cyan]%}@$_HOSTNAME%{$fg[cyan]%}: %{$reset_color%}$_PATH%{$fg[cyan]%}]%{$reset_color%}"
-    RIGHT="%{$fg_bold[grey]%}$(cyb_prompt_git_hash)$_TIME%{$reset_color%} "
+    RIGHT="%{$fg[white]%}$(cyb_prompt_git_hash)$_TIME%{$reset_color%} "
 
     RIGHTWIDTH=$(($COLUMNS-${#LEFT}))
     #print -rP $LEFT${(l:$RIGHTWIDTH::.:)RIGHT}
