@@ -1,4 +1,5 @@
-FROM ubuntu:20.04
+ARG ARCH=
+FROM ${ARCH}ubuntu:20.04
 
 RUN apt-get update && apt-get -y full-upgrade && \
     DEBIAN_FRONTEND=noninteractive apt-get -y install openssh-server mcrypt libcap2-bin \
