@@ -90,6 +90,17 @@ gitCheckDirty() {
     fi
 }
 
+findBinaryByWhich() {
+  set +e
+  binary=$(which "${1}")
+  if [ $? -ne 0 ]; then
+    return
+  fi
+  set -e
+  echo ${binary}
+  return
+}
+
 setPermissions() {
     chown -R ${APPLICATION_UID}:${APPLICATION_GID} .
     find . -type d -exec chmod ugo+rx,ug+w {} \;
@@ -170,8 +181,8 @@ deployDirect() {
 }
 
 loadEnvironmentVariables
-BIN_PHP=${BIN_PHP:-php}
-BIN_COMPOSER=${BIN_COMPOSER:-composer}
+if [ -z "${BIN_PHP}" ]; then BIN_PHP=$(findBinaryByWhich php); fi
+if [ -z "${BIN_COMPOSER}" ]; then BIN_COMPOSER=$(findBinaryByWhich composer); fi
 GIT_BRANCH="${GIT_BRANCH:-master}"
 RUN_AS_USERNAME=${RUN_AS_USERNAME:-}
 setDockerComposeFile
