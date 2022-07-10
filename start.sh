@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -e; # Exit on error
 
 SCRIPTPATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 cd "${SCRIPTPATH}"
@@ -18,30 +18,38 @@ loadEnvironmentVariables() {
     fi
 }
 
-setDockerComposeFile() {
-    DOCKER_COMPOSE_FILE=docker-compose.yml
-
+isContextDevelopment() {
     # Symfony
     APP_ENV=${APP_ENV:-}
     if [ "${APP_ENV}" == "dev" ]; then
-        DOCKER_COMPOSE_FILE=docker-compose.dev.yml
+        echo 1;
+        return;
     fi
 
     # TYPO3
     TYPO3_CONTEXT=${TYPO3_CONTEXT:-}
     if [ "${TYPO3_CONTEXT:0:11}" == "Development" ]; then
-        DOCKER_COMPOSE_FILE=docker-compose.dev.yml
+        echo 1; return;
     fi
 
     # TYPO3
     WP_ENVIRONMENT_TYPE=${WP_ENVIRONMENT_TYPE:-}
     if [ "${WP_ENVIRONMENT_TYPE:0:11}" == "development" ]; then
-        DOCKER_COMPOSE_FILE=docker-compose.dev.yml
+        echo 1; return;
     fi
 
     # Custom
     ENV_DOCKER_CONTEXT=${ENV_DOCKER_CONTEXT:-}
     if [ "${ENV_DOCKER_CONTEXT:0:11}" == "Development" ]; then
+        echo 1; return;
+    fi
+
+    echo 0;
+}
+
+setDockerComposeFile() {
+    DOCKER_COMPOSE_FILE=docker-compose.yml
+    if [ "$(isContextDevelopment)" == "1" ]; then
         DOCKER_COMPOSE_FILE=docker-compose.dev.yml
     fi
 }
@@ -88,38 +96,32 @@ setPermissions() {
     find . -type f -exec chmod ugo+r,ug+w {} \;
 }
 
-gitPullHost() {
+gitPull() {
     if [ -d ".git" ]; then
         git pull "${@:1}"
     fi
 }
 
-gitPullGuest() {
-    if [ -d ".git" ]; then
-        startFunction exec-web git pull "${@:1}"
-    fi
-}
-
 composerInstall() {
     if [ -f "composer.json" ]; then
-        startFunction exec-web composer install "${@:1}"
+        ${BIN_PHP} ${BIN_COMPOSER} --no-interaction install "${@:1}"
     fi
 }
 
 symfonyUpdateDatabase() {
-    if [ -f "symfony.lock" ]; then
+    if [ -f "symfony.lock" ] && [ ! -z "${DATABASE_URL}" ]; then
         read -p 'Update database schema? [y/N] ' -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
-            startFunction exec-web ./bin/console doctrine:schema:update --force
+            ${BIN_PHP} ./bin/console doctrine:schema:update --force
         fi
     fi
 }
 
 symfonyClearCache() {
     if [ -f "symfony.lock" ]; then
-        startFunction exec-web ./bin/console cache:clear --no-warmup
-        startFunction exec-web ./bin/console cache:warmup
+        ${BIN_PHP} ./bin/console cache:clear --no-warmup
+        ${BIN_PHP} ./bin/console cache:warmup
     fi
 }
 
@@ -130,27 +132,48 @@ deployImages() {
   docker push cyb10101/ssh:latest
 
   # Clean up
+  set +e
   docker rmi $(docker images --filter=reference="cyb10101/ssh:latest" -q)
   docker rmi $(docker images --filter=reference="ubuntu:20.04" -q)
+  set -e
 }
 
 runDeploy() {
-    gitPullHost origin ${GIT_BRANCH}
-    #setPermissions
+    checkRoot
+    gitCheckBranch ${GIT_BRANCH}
+    gitCheckDirty
 
-    # Git: Deploy as user in container (SSH-Key for private repositories needed)
-    #gitPullGuest origin ${GIT_BRANCH}
+    # Task 1: Deploy Git as root in server
+    gitPull origin ${GIT_BRANCH}
+    setPermissions
 
-    # Deploy as user in container
-    #startFunction start
-    #composerInstall
+    # Task 2: Deploy as user in container (Docker)
+    startFunction start
+    startFunction exec-web ./start.sh deployDirect
 
-    #symfonyUpdateDatabase
-    #symfonyClearCache
+    # Task 2: Deploy as user in system (Switch from root to user)
+    #if [ -z "${RUN_AS_USERNAME}" ]; then echo 'Error variable RUN_AS_USERNAME is empty!'; exit 1; fi
+    #runuser -u ${RUN_AS_USERNAME} -- ./start.sh deployDirect
+
+    # Task 2: Deploy directly (Webhosting)
+    #startFunction deployDirect
+}
+
+# Deploy directly (In Docker container or Webhosting)
+deployDirect() {
+    # For in Container or Webhosting (SSH-Key for private repositories needed)
+    #gitPull origin ${GIT_BRANCH}
+
+    composerInstall
+    symfonyUpdateDatabase
+    symfonyClearCache
 }
 
 loadEnvironmentVariables
+BIN_PHP=${BIN_PHP:-php}
+BIN_COMPOSER=${BIN_COMPOSER:-composer}
 GIT_BRANCH="${GIT_BRANCH:-master}"
+RUN_AS_USERNAME=${RUN_AS_USERNAME:-}
 setDockerComposeFile
 
 startFunction() {
@@ -185,10 +208,10 @@ startFunction() {
           deployImages
         ;;
         deploy)
-            checkRoot
-            gitCheckBranch ${GIT_BRANCH}
-            gitCheckDirty
             runDeploy
+        ;;
+        deployDirect)
+            deployDirect
         ;;
         *)
             dockerComposeCmd "${@:1}"
