@@ -17,6 +17,10 @@ fi
 #export LSCOLORS="exfxcxdxbxbxbxbxbxbxbx"
 #export LS_COLORS="di=34;40:ln=35;40:so=32;40:pi=33;40:ex=31;40:bd=31;40:cd=31;40:su=31;40:sg=31;40:tw=31;40:ow=31;40:"
 
+# Syntax highlighting
+# https://github.com/zsh-users/zsh-syntax-highlighting/blob/master/highlighters/main/main-highlighter.zsh
+ZSH_HIGHLIGHT_STYLES[comment]=fg=#888888,bold
+
 # Git
 ZSH_THEME_GIT_PROMPT_SHA_BEFORE=""
 ZSH_THEME_GIT_PROMPT_SHA_AFTER=""
@@ -26,13 +30,13 @@ ZSH_THEME_GIT_PROMPT_SUFFIX=""
 
 ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg[magenta]%} ☂"
 ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[green]%} ☀"
-ZSH_THEME_GIT_PROMPT_UNTRACKED="%{$fg[cyan]%} ✱"
 
 ZSH_THEME_GIT_PROMPT_ADDED="%{$fg[yellow]%} ✚"
 ZSH_THEME_GIT_PROMPT_MODIFIED="%{$fg[green]%} ⚡"
 ZSH_THEME_GIT_PROMPT_DELETED="%{$fg[red]%} ✖"
 ZSH_THEME_GIT_PROMPT_RENAMED="%{$fg[blue]%} ➜"
 ZSH_THEME_GIT_PROMPT_UNMERGED="%{$fg[red]%} ="
+ZSH_THEME_GIT_PROMPT_UNTRACKED="%{$fg[cyan]%} ✱"
 
 ZSH_THEME_GIT_PROMPT_AHEAD="%{$fg[cyan]%} ▴"
 ZSH_THEME_GIT_PROMPT_BEHIND="%{$fg[magenta]%} ▾"
