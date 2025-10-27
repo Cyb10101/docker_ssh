@@ -1,10 +1,8 @@
-version: '3.8'
-
 services:
   ssh:
     image: cyb10101/ssh:latest
     restart: always
-    hostname: example
+    hostname: ssh-user
     volumes:
       - ./public:/data/example_www
     ports:
@@ -12,8 +10,8 @@ services:
     environment:
       - TZ=Europe/Berlin
       - LANG=de_DE.UTF-8
-      - APPLICATION_USER=application
-      - APPLICATION_GROUP=application
+      - APPLICATION_USER=user
+      - APPLICATION_GROUP=user
       - PASSWORD=Admin123!
       #- SSH_KEYS_ONLY=1
       #- SSH_PUBLIC_KEY=ssh-rsa AB...iQ== user@example.org
