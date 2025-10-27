@@ -47,7 +47,7 @@ zstyle ':omz:update' mode auto      # update automatically without asking
 # zstyle ':omz:update' frequency 13
 
 # Uncomment the following line if pasting URLs and other text is messed up.
-# DISABLE_MAGIC_FUNCTIONS="true"
+DISABLE_MAGIC_FUNCTIONS="true"
 
 # Uncomment the following line to disable colors in ls.
 # DISABLE_LS_COLORS="true"
@@ -85,7 +85,7 @@ HIST_STAMPS="yyyy-mm-dd"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git ssh-agent)
+plugins=(git zsh-syntax-highlighting ssh-agent)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -115,5 +115,6 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#888888"
 source ~/.shell-methods.sh
 addAlias

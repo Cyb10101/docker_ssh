@@ -33,8 +33,18 @@ createUserIfNotExists() {
   # User not exists
   if ! id "${APPLICATION_USER}" > /dev/null 2>&1; then
     echo "Create user ${APPLICATION_USER}..."
-    # Add group
-    groupadd -g "${APPLICATION_GID}" "${APPLICATION_GROUP}"
+
+    # Re-use existing group with requested GID if present
+    EXISTING_GROUP_WITH_GID=$(getent group "${APPLICATION_GID}" | cut -d: -f1 || true)
+    if [ ! -z "${EXISTING_GROUP_WITH_GID}" ] && [ "${EXISTING_GROUP_WITH_GID}" != "${APPLICATION_GROUP}" ]; then
+      echo "Group ${EXISTING_GROUP_WITH_GID} already uses GID ${APPLICATION_GID}, re-using it."
+      APPLICATION_GROUP="${EXISTING_GROUP_WITH_GID}"
+    fi
+
+    # Add group if missing
+    if ! getent group "${APPLICATION_GROUP}" > /dev/null 2>&1; then
+      groupadd -g "${APPLICATION_GID}" "${APPLICATION_GROUP}"
+    fi
 
     # Add user without password
     #useradd -u "${APPLICATION_UID}" --home "${APPLICATION_HOME}" --create-home --shell /bin/${SHELL} --no-user-group "${APPLICATION_USER}" -k /etc/skel
@@ -197,18 +207,23 @@ configureFail2Ban
 notes
 cleanup
 
-# Remove Socket file
-if [ ! -z "$(service fail2ban status | grep 'is running')" ]; then
-  service fail2ban stop
-fi
+# Remove stale Fail2Ban socket if present
 if [ -S /var/run/fail2ban/fail2ban.sock ]; then
   rm /var/run/fail2ban/fail2ban.sock
 fi
 
 echo 'Start services...'
-service rsyslog restart > /dev/null
-service ssh restart > /dev/null
-service fail2ban restart > /dev/null
+
+# Ubuntu 24.04 no longer ships a SysV init script for rsyslog; start it directly.
+if command -v rsyslogd > /dev/null 2>&1; then
+  rsyslogd
+fi
+
+service ssh restart > /dev/null 2>&1 || /etc/init.d/ssh start > /dev/null 2>&1
+service fail2ban restart > /dev/null 2>&1 || /etc/init.d/fail2ban start > /dev/null 2>&1
+if ! pgrep -x fail2ban-server > /dev/null 2>&1; then
+  fail2ban-server -b > /dev/null 2>&1 || true
+fi
 
 echo 'Running...'
 #tail -f /dev/null

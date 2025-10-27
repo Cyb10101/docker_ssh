@@ -19,17 +19,17 @@ COLOR_LCYAN=$(echo -en '\001\033[01;36m\002')
 COLOR_WHITE=$(echo -en '\001\033[01;37m\002')
 
 # Set Terminal title
-function userTerminalTitle {
+userTerminalTitle() {
     echo -e '\033]2;'$1'\007'
 }
 
 # Set Terminal title - current folder
-function userTerminalTitlePwd {
+userTerminalTitlePwd() {
     echo -e '\033]2;'$(pwd)'\007'
 }
 
 # Set current user color
-function userColorUser {
+userColorUser() {
     if [[ $EUID -eq 0 ]]; then
         echo "${COLOR_LRED}";
     else
@@ -38,14 +38,14 @@ function userColorUser {
 }
 
 # Render Git branch for PS1
-function renderGitBranch {
+renderGitBranch() {
     if [ -f $(which git) ]; then
         echo "${COLOR_YELLOW}$(__git_ps1)"
     fi
 }
 
 # Style bash prompt
-function stylePS1 {
+stylePS1() {
     VAR_HOSTNAME=`hostname`
     if [ ! -z "$1" ] || [ "$1" != "" ]; then
         VAR_HOSTNAME="${1}"
@@ -59,7 +59,7 @@ function stylePS1 {
 }
 
 # Style bash prompt
-function bashCompletion {
+bashCompletion() {
   if [ -f $(which git) ]; then
       source /usr/share/bash-completion/completions/git
       source /etc/bash_completion.d/git-prompt
@@ -67,27 +67,17 @@ function bashCompletion {
 }
 
 # Shortcuts in bash
-function addAlias {
-    # color grep
+addAlias() {
+    # Grep
     alias grep='grep --color=auto'
     alias egrep='egrep --color=auto'
     alias fgrep='fgrep --color=auto'
 
-    # ls
+    # List directory
     alias l='ls -CF --color=auto'
     alias la='ls -A --color=auto'
     alias ll='ls -ahlF --color=auto'
     alias ls='ls --color=auto'
-
-    # cd
-    alias ..='cd ..'
-    alias cd..='cd ..'
-
-    # get current unixtime
-    alias unixtime='date +"%s"'
-
-    # show all open ports
-    alias ports='netstat -tulanp'
 
     # less defaults
     alias less='less -FSRX'

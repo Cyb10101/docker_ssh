@@ -146,14 +146,14 @@ symfonyClearCache() {
 
 deployImages() {
   # Default: 32 bit & 64 bit
-  docker pull ubuntu:20.04
+  docker pull ubuntu:24.04
   docker build --no-cache --file Dockerfile --tag cyb10101/ssh:latest .
   docker push cyb10101/ssh:latest
 
   # Clean up
   set +e
   docker rmi $(docker images --filter=reference="cyb10101/ssh:latest" -q)
-  docker rmi $(docker images --filter=reference="ubuntu:20.04" -q)
+  docker rmi $(docker images --filter=reference="ubuntu:24.04" -q)
   set -e
 }
 
